@@ -1,3 +1,4 @@
+package com.github.MehrabRahman.nasa;
 import java.net.URL;
 import java.util.Properties;
 
@@ -18,41 +19,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Nasa {
 	public static void main(String[] args) {
 		Logger log = LoggerFactory.getLogger(Nasa.class.getName());
-		Properties props = new Properties();
-		if (args.length > 0) {
-			for (int i = 0; i < args.length; i++) {
-				switch (args[i]) {
-					case "-s":
-						runServer();
-					case "-t":
-						props.setProperty("title", "true");
-						break;
-					case "--api":
-						i++;
-						props.setProperty("api", args[i]);
-						break;
-					default:
-						log.debug("Unknown argument");
-						break;
-				}
-			}
-		} else {
-			try {
-				props.load(Nasa.class.getClassLoader().getResourceAsStream("application.properties"));
-				
-			} catch (IOException e) {
-				System.err.println("Configuration file not found");
-			}
-		}
-		props.forEach((k, v) -> System.out.println(k + " = " + v));
-		ObjectMapper mapper = new ObjectMapper();
+		ApplicationContext applicationContext = new ApplicationContext(args);
+		Properties props = applicationContext.getProps();
+		ObjectMapper mapper = applicationContext.getMapper();
 
+		//Connection
 		URL url = null;
 		try {
 			url = new URL("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
@@ -80,6 +58,7 @@ public class Nasa {
 			System.err.println("Could not read response");
 		}
 
+		//UI
 		Apod output = new Apod();
 		try {
 			output = mapper.readValue(body, Apod.class);
@@ -102,6 +81,17 @@ public class Nasa {
 		server.setPort(8081);
 		server.getConnector();
 		server.addContext("", null);
+		server.addServlet("", "defaultServlet", new HttpServlet() {
+			@Override
+			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+					throws ServletException, IOException {
+				String fileName = req.getPathInfo().replaceFirst("/", "");
+				InputStream file = getClass().getClassLoader().getResourceAsStream(fileName);
+				String mimeType = getServletContext().getMimeType(fileName);
+				resp.setContentType(mimeType);
+				IOUtils.copy(file, resp.getOutputStream());
+			}
+		}).addMapping("/*");
 		server.addServlet("", "helloServlet", new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
