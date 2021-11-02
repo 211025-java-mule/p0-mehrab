@@ -81,9 +81,9 @@ public class Nasa {
 
 		//DB
 		try {
-			Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sa", "");
+			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
 			Statement statement = conn.createStatement();
-			statement.execute("create table apod(title varchar(150))");
+			statement.execute("create table if not exists apod(title varchar(150))");
 			statement.execute("insert into apod(title) values ('"+ output.toString() +"')");
 			ResultSet rs = statement.executeQuery("select * from apod");
 			while (rs.next()) {
