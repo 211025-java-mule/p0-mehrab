@@ -1,5 +1,10 @@
 package com.github.MehrabRahman.nasa;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -72,6 +77,24 @@ public class Nasa {
 			outpuFileWriter.write(output.toString() + "\n");
 		} catch (IOException e) {
 			log.error("Output file error");
+		}
+
+		//DB
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:h2:mem:test", "sa", "");
+			Statement statement = conn.createStatement();
+			statement.execute("create table apod(title varchar(150))");
+			statement.execute("insert into apod(title) values ('"+ output.toString() +"')");
+			ResultSet rs = statement.executeQuery("select * from apod");
+			while (rs.next()) {
+				System.out.println("SQL: " + rs.getString("title"));
+			}
+			rs.close();
+			statement.close();
+			conn.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
