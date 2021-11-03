@@ -33,7 +33,7 @@ public class ApplicationContext {
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i]) {
 					case "-s":
-						//runServer();
+						Nasa.runServer();
 						break;
 					case "-t":
 						props.setProperty("title", "true");

@@ -9,6 +9,9 @@ Description here
 - Can ...
 
 # Running
+Setup DB
+>docker run -it --rm -p 5432:5432 -e POSTGRES_USER=nasa -e POSTGRES_PASSWORD=nasa --name nasadb -v $(pwd)/schema.sql:/docker-entrypoint-initdb.d/schema.sql postgres
+
 Debug
 >mvn exec:java -q
 

@@ -83,7 +83,7 @@ public class Nasa {
 		try {
 			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
 			Statement statement = conn.createStatement();
-			statement.execute("create table if not exists apod(title varchar(150))");
+			// statement.execute("create table if not exists apod(title varchar(150))");
 			statement.execute("insert into apod(title) values ('"+ output.toString() +"')");
 			ResultSet rs = statement.executeQuery("select * from apod");
 			while (rs.next()) {
@@ -98,10 +98,10 @@ public class Nasa {
 		}
 	}
 
-	private static void runServer() {
+	public static void runServer() {
 		Tomcat server = new Tomcat();
 		server.setBaseDir(System.getProperty("java.io.tmpdir"));
-		server.setPort(8081);
+		server.setPort(8080);
 		server.getConnector();
 		server.addContext("", null);
 		server.addServlet("", "defaultServlet", new HttpServlet() {
@@ -115,11 +115,15 @@ public class Nasa {
 				IOUtils.copy(file, resp.getOutputStream());
 			}
 		}).addMapping("/*");
+
 		server.addServlet("", "helloServlet", new HttpServlet() {
 			@Override
 			protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 					throws ServletException, IOException {
-				resp.getWriter().println("Hello from Tomcat!");
+				String name = req.getParameter("name");
+				if (name == null)
+						name = "Tomcat";
+				resp.getWriter().println("<h1>Hello, " + name + "!</h1>");
 			}
 		}).addMapping("/hello");
 		try {
