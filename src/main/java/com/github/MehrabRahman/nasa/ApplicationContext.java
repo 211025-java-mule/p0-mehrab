@@ -13,10 +13,12 @@ public class ApplicationContext {
     private final static Logger log = LoggerFactory.getLogger(ApplicationContext.class.getName());
     private Properties props;
     private ObjectMapper mapper;
+	private NasaService nasaService;
     
     public ApplicationContext(String[] args) {
         this.props = new Properties();
         this.mapper = new ObjectMapper();
+		this.nasaService = new NasaService(mapper);
         argsParser(args);
     }
 
@@ -28,12 +30,16 @@ public class ApplicationContext {
         return mapper;
     }    
 
+	public NasaService getNasaService() {
+		return nasaService;
+	}
+
     private void argsParser(String[] args) {
 		if (args.length > 0) {
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i]) {
 					case "-s":
-						Nasa.runServer();
+						props.setProperty("server", "true");
 						break;
 					case "-t":
 						props.setProperty("title", "true");
@@ -43,7 +49,7 @@ public class ApplicationContext {
 						props.setProperty("api", args[i]);
 						break;
 					default:
-						log.debug("Unknown argument");
+						log.trace("Unknown argument");
 						break;
 				}
 			}

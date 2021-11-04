@@ -12,11 +12,11 @@ public class Apod {
 	public String url;
 	@JsonIgnore
 	public String hdurl;
-
-	/**
-	 * 
-	 */
+	
+	@Override
 	public String toString() {
-		return this.title;
+		return "Apod [copyright=" + copyright + ", date=" + date + ", explanation=" + explanation + ", hdurl=" + hdurl
+				+ ", media_type=" + media_type + ", service_version=" + service_version + ", title=" + title + ", url="
+				+ url + "]";
 	}
 }

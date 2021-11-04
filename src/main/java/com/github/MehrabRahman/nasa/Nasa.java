@@ -33,44 +33,10 @@ public class Nasa {
 		Logger log = LoggerFactory.getLogger(Nasa.class.getName());
 		ApplicationContext applicationContext = new ApplicationContext(args);
 		Properties props = applicationContext.getProps();
-		ObjectMapper mapper = applicationContext.getMapper();
+		NasaService nasaService = applicationContext.getNasaService();
 
-		//Connection
-		URL url = null;
-		try {
-			url = new URL("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY");
-		} catch (MalformedURLException e) {
-			System.err.println("404 not found");
-		}
-		HttpURLConnection connection = null;
-		try {
-			connection = (HttpURLConnection) url.openConnection();
-		} catch (IOException e) {
-			System.err.println("400 Error connecting");
-		}
-		connection.setRequestProperty("Accept", "application/json");
-		connection.setRequestProperty("User-Agent", "java");
-		InputStream response = null;
-		try {
-			response = connection.getInputStream();
-		} catch (IOException e) {
-			System.err.println("Could not open response");
-		}
-		String body = null;
-		try {
-			body = new String(response.readAllBytes());
-		} catch (IOException e) {
-			System.err.println("Could not read response");
-		}
-
-		//UI
-		Apod output = new Apod();
-		try {
-			output = mapper.readValue(body, Apod.class);
-		} catch (JsonProcessingException e) {
-			System.err.println("Could not parse response");
-			System.err.println(e.getMessage());
-		}
+		Apod output = nasaService.getApod();
+		
 		System.out.println(output);
 		File outputFile = new File("output.txt");
 		try(FileWriter outpuFileWriter = new FileWriter(outputFile, true);	) {
