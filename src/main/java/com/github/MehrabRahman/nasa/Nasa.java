@@ -1,26 +1,20 @@
 package com.github.MehrabRahman.nasa;
-import java.net.URL;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.io.InputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
@@ -37,7 +31,10 @@ public class Nasa {
 
 		Apod output = nasaService.getApod();
 		
+		//Console STDOUT
 		System.out.println(output);
+
+		//File
 		File outputFile = new File("output.txt");
 		try(FileWriter outpuFileWriter = new FileWriter(outputFile, true);	) {
 			outpuFileWriter.write(output.toString() + "\n");
@@ -47,11 +44,20 @@ public class Nasa {
 
 		//DB
 		try {
-			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
-			Statement statement = conn.createStatement();
-			// statement.execute("create table if not exists apod(title varchar(150))");
-			statement.execute("insert into apod(title) values ('"+ output.toString() +"')");
-			ResultSet rs = statement.executeQuery("select * from apod");
+			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/nasa", "nasa", "nasa");
+			PreparedStatement statement = conn.prepareStatement("insert into apod(copyright, day, explanation, media_type, service_version, title, url, hdurl) values (?, ?, ?, ?, ?, ?, ?, ?)");
+			statement.setString(1, output.copyright);
+			statement.setDate(2, Date.valueOf(output.date));
+			statement.setString(3, output.explanation);
+			statement.setString(4, output.media_type);
+			statement.setString(5, output.service_version);
+			statement.setString(6, output.title);
+			statement.setString(7, output.url);
+			statement.setString(8, output.hdurl);
+			statement.executeUpdate();
+			statement.close();
+			statement = conn.prepareStatement("select * from apod");
+			ResultSet rs = statement.executeQuery();
 			while (rs.next()) {
 				System.out.println("SQL: " + rs.getString("title"));
 			}
@@ -59,7 +65,6 @@ public class Nasa {
 			statement.close();
 			conn.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
