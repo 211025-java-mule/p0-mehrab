@@ -1,6 +1,10 @@
 package com.github.MehrabRahman.nasa;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,11 +18,19 @@ public class ApplicationContext {
     private Properties props;
     private ObjectMapper mapper;
 	private NasaService nasaService;
+    private ArrayList<ApodRepository> repositories = new ArrayList<>();
+    private ApodPostgresRepository apodRepository;
+    private ApodFileRepository apodFileRepository;
     
-    public ApplicationContext(String[] args) {
+    public ApplicationContext(String[] args) throws SQLException {
         this.props = new Properties();
         this.mapper = new ObjectMapper();
 		this.nasaService = new NasaService(mapper);
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/nasa", "nasa", "nasa");		
+        this.apodRepository = new ApodPostgresRepository(conn);
+        this.apodFileRepository = new ApodFileRepository();
+		this.repositories.add(apodRepository);
+		this.repositories.add(apodFileRepository);
         argsParser(args);
     }
 
@@ -32,7 +44,11 @@ public class ApplicationContext {
 
 	public NasaService getNasaService() {
 		return nasaService;
-	}
+	}  
+
+    public ArrayList<ApodRepository> getRepositories() {
+        return repositories;
+    }
 
     private void argsParser(String[] args) {
 		if (args.length > 0) {

@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
@@ -23,49 +24,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Nasa {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 		Logger log = LoggerFactory.getLogger(Nasa.class.getName());
 		ApplicationContext applicationContext = new ApplicationContext(args);
 		Properties props = applicationContext.getProps();
 		NasaService nasaService = applicationContext.getNasaService();
+		ArrayList<ApodRepository> repositories = applicationContext.getRepositories();
 
 		Apod output = nasaService.getApod();
 		
-		//Console STDOUT
+		//UI - Console STDOUT
 		System.out.println(output);
 
-		//File
-		File outputFile = new File("output.txt");
-		try(FileWriter outpuFileWriter = new FileWriter(outputFile, true);	) {
-			outpuFileWriter.write(output.toString() + "\n");
-		} catch (IOException e) {
-			log.error("Output file error");
-		}
+		//UI - HTTP Server
 
-		//DB
-		try {
-			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/nasa", "nasa", "nasa");
-			PreparedStatement statement = conn.prepareStatement("insert into apod(copyright, day, explanation, media_type, service_version, title, url, hdurl) values (?, ?, ?, ?, ?, ?, ?, ?)");
-			statement.setString(1, output.copyright);
-			statement.setDate(2, Date.valueOf(output.date));
-			statement.setString(3, output.explanation);
-			statement.setString(4, output.media_type);
-			statement.setString(5, output.service_version);
-			statement.setString(6, output.title);
-			statement.setString(7, output.url);
-			statement.setString(8, output.hdurl);
-			statement.executeUpdate();
-			statement.close();
-			statement = conn.prepareStatement("select * from apod");
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
-				System.out.println("SQL: " + rs.getString("title"));
-			}
-			rs.close();
-			statement.close();
-			conn.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		// Sinks
+		for(ApodRepository repository : repositories) {
+			repository.create(output);
 		}
 	}
 

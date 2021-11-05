@@ -20,6 +20,6 @@ public class NasaServiceTest {
     @Test
     public void getApodTest() {
         Apod testApod = nasaService.getApod();
-        assertNotNull(testApod.date);
+        assertNotNull(testApod.getDate());
     }
 }
