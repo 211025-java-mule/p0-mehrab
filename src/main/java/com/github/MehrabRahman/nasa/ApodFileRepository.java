@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class ApodFileRepository implements ApodRepository{
     public void create(Apod output) {
         //File

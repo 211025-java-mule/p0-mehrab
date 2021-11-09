@@ -3,9 +3,11 @@ package com.github.MehrabRahman.nasa;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class ApodPostgresRepository implements ApodRepository{
     private Connection connection;
 

@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses(
-    {ApplicationContextTest.class, OtherTest.class}
+    {/*ApplicationContextTest.class, */OtherTest.class}
 )
 public class AppContextTestSuite {
     
